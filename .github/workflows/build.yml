@@ -23,6 +23,21 @@ jobs:
           flutter-version: '3.19.x'
           channel: 'stable'
 
+      - name: Create Flutter Project Structure
+        run: |
+          # 既存のファイル（libとpubspec）を退避させてから正式なプロジェクト構造を作る
+          mkdir temp_work
+          mv lib temp_work/
+          mv pubspec.yaml temp_work/
+          
+          flutter create . --org com.example --project-name my_app
+          
+          # 退避させていたファイルを上書き戻しする
+          rm -rf lib
+          mv temp_work/lib .
+          mv temp_work/pubspec.yaml .
+          rm -rf temp_work
+
       - name: Get dependencies
         run: flutter pub get
 
