@@ -20,26 +20,28 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.x'
+          flutter-version: '3.19.6'
           channel: 'stable'
 
-      - name: Create Flutter Project Structure
+      - name: Clean & Create Flutter Project
         run: |
-          # 既存のファイル（libとpubspec）を退避させてから正式なプロジェクト構造を作る
-          mkdir temp_work
-          mv lib temp_work/
-          mv pubspec.yaml temp_work/
+          # 既存のlibとpubspecを一時退避
+          mkdir -p temp_backup
+          if [ -d "lib" ]; then mv lib temp_backup/; fi
+          if [ -f "pubspec.yaml" ]; then mv pubspec.yaml temp_backup/; fi
           
+          # クリーンな状態でFlutterプロジェクトを新規作成
           flutter create . --org com.example --project-name my_app
           
-          # 退避させていたファイルを上書き戻しする
+          # 退避させていたファイルを元に戻す
           rm -rf lib
-          mv temp_work/lib .
-          mv temp_work/pubspec.yaml .
-          rm -rf temp_work
-
-      - name: Get dependencies
-        run: flutter pub get
+          mv temp_backup/lib .
+          mv temp_backup/pubspec.yaml .
+          rm -rf temp_backup
+          
+          # Gradleのキャッシュや依存関係を綺麗にする
+          flutter clean
+          flutter pub get
 
       - name: Build APK (Debug)
         run: flutter build apk --debug
